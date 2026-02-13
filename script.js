@@ -1,21 +1,26 @@
 /**
- * FATHER VS DEMONS - STABLE MEGA UPDATE
+ * FATHER VS DEMONS - ULTIMATE COMPATIBILITY VERSION
+ * Features: 30 Levels, 7 Crosses, Boss Platforms, Mobile Optimized
  */
 
-// --- Audio System ---
+// --- Audio System (Safe Initialization) ---
 let audioCtx = null;
 let isMuted = false;
 
 function playSound(type) {
     if (isMuted) return;
     try {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
         if (audioCtx.state === 'suspended') audioCtx.resume();
+        
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         const now = audioCtx.currentTime;
+
         switch(type) {
             case 'shoot':
                 osc.type = 'triangle';
@@ -58,7 +63,7 @@ function playSound(type) {
                 osc.start(now); osc.stop(now + 0.2);
                 break;
         }
-    } catch(e) {}
+    } catch(e) { console.warn("Audio context blocked or not supported"); }
 }
 
 // --- Constants ---
@@ -78,6 +83,18 @@ const CROSS_TYPES = {
 };
 
 // --- Classes ---
+class Platform {
+    constructor(x, y, w, h) {
+        this.x = x; this.y = y; this.w = w; this.h = h;
+    }
+    draw(ctx) {
+        ctx.fillStyle = '#444';
+        ctx.fillRect(this.x, this.y, this.w, this.h);
+        ctx.strokeStyle = '#666';
+        ctx.strokeRect(this.x, this.y, this.w, this.h);
+    }
+}
+
 class Particle {
     constructor(x, y, color, size, vx, vy, life) {
         this.x = x; this.y = y; this.color = color; this.size = size;
@@ -175,10 +192,33 @@ class Player {
         this.invul = 0; this.selectedCross = CROSS_TYPES.BASIC;
         this.unlockedCrosses = [1];
     }
-    update() {
-        this.vy += GRAVITY; this.y += this.vy; this.x += this.vx;
-        if (this.y > GROUND_Y - this.h) { this.y = GROUND_Y - this.h; this.vy = 0; this.onGround = true; } else { this.onGround = false; }
-        if (this.x < 0) this.x = 0; if (this.x > CANVAS_WIDTH - this.w) this.x = CANVAS_WIDTH - this.w;
+    update(platforms) {
+        this.vy += GRAVITY;
+        this.y += this.vy;
+        this.x += this.vx;
+        this.onGround = false;
+
+        // Ground collision
+        if (this.y > GROUND_Y - this.h) {
+            this.y = GROUND_Y - this.h;
+            this.vy = 0;
+            this.onGround = true;
+        }
+
+        // Platform collision (only when falling)
+        if (this.vy >= 0) {
+            platforms.forEach(p => {
+                if (this.x + this.w > p.x && this.x < p.x + p.w &&
+                    this.y + this.h >= p.y && this.y + this.h <= p.y + p.h + this.vy) {
+                    this.y = p.y - this.h;
+                    this.vy = 0;
+                    this.onGround = true;
+                }
+            });
+        }
+
+        if (this.x < 0) this.x = 0;
+        if (this.x > CANVAS_WIDTH - this.w) this.x = CANVAS_WIDTH - this.w;
         if (this.invul > 0) this.invul--;
     }
     draw(ctx) {
@@ -201,7 +241,7 @@ class Player {
 }
 
 const game = {
-    canvas: null, ctx: null, player: new Player(), enemies: [], crosses: [], particles: [],
+    canvas: null, ctx: null, player: new Player(), enemies: [], crosses: [], particles: [], platforms: [],
     score: 0, highScore: 0, phase: 1, state: 'MENU', keys: {},
     spawnTimer: 0, enemiesToSpawn: 0, shake: 0,
 
@@ -211,7 +251,9 @@ const game = {
         this.ctx = this.canvas.getContext('2d');
         this.canvas.width = CANVAS_WIDTH; this.canvas.height = CANVAS_HEIGHT;
         this.highScore = localStorage.getItem('fatherVsDemons_highScore') || 0;
-        document.getElementById('high-score').innerText = `HIGH SCORE: ${this.highScore}`;
+        const hsEl = document.getElementById('high-score');
+        if (hsEl) hsEl.innerText = `HIGH SCORE: ${this.highScore}`;
+
         window.addEventListener('keydown', e => {
             this.keys[e.code] = true;
             if (e.code === 'Escape') this.togglePause();
@@ -233,7 +275,7 @@ const game = {
     setupMobile() {
         const bind = (id, code) => {
             const el = document.getElementById(id); if (!el) return;
-            el.addEventListener('touchstart', (e) => { e.preventDefault(); this.keys[code] = true; });
+            el.addEventListener('touchstart', (e) => { e.preventDefault(); this.keys[code] = true; playSound('shoot'); });
             el.addEventListener('touchend', (e) => { e.preventDefault(); this.keys[code] = false; });
         };
         bind('btn-left', 'ArrowLeft'); bind('btn-right', 'ArrowRight');
@@ -251,6 +293,15 @@ const game = {
     startPhase(p) {
         this.phase = p; this.state = 'TRANSITION';
         this.enemies = []; this.enemiesToSpawn = 5 + (p * 3);
+        this.platforms = [];
+        
+        // Add platforms for Boss levels or every 5 levels
+        if (p % 5 === 0 || p % 10 === 0) {
+            this.platforms.push(new Platform(150, 380, 150, 20));
+            this.platforms.push(new Platform(500, 380, 150, 20));
+            this.platforms.push(new Platform(325, 250, 150, 20));
+        }
+
         if (p % 10 === 0) this.enemiesToSpawn = 1;
         Object.values(CROSS_TYPES).forEach(t => {
             if (this.phase >= t.phase && !this.player.unlockedCrosses.includes(t.id)) {
@@ -277,7 +328,9 @@ const game = {
         else { this.player.vx = 0; }
         if (this.keys['ArrowUp'] || this.keys['Space']) this.player.jump();
         if (this.keys['ControlLeft'] || this.keys['KeyK']) { this.shoot(); this.keys['ControlLeft'] = false; this.keys['KeyK'] = false; }
-        this.player.update();
+        
+        this.player.update(this.platforms);
+        
         this.spawnTimer++;
         if (this.spawnTimer > Math.max(20, 60 - this.phase)) {
             this.spawnTimer = 0; if (this.enemiesToSpawn > 0) this.spawnEnemy();
@@ -348,6 +401,8 @@ const game = {
         this.ctx.fillStyle = '#111'; this.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
         this.ctx.fillStyle = '#222'; for(let i=0; i<5; i++) this.ctx.fillRect(i * 200 - (this.player.x * 0.2 % 200), 0, 40, CANVAS_HEIGHT);
         this.ctx.fillStyle = '#333'; this.ctx.fillRect(0, GROUND_Y, CANVAS_WIDTH, CANVAS_HEIGHT - GROUND_Y);
+        
+        this.platforms.forEach(p => p.draw(this.ctx));
         this.crosses.forEach(c => c.draw(this.ctx));
         this.enemies.forEach(e => e.draw(this.ctx));
         this.player.draw(this.ctx);
