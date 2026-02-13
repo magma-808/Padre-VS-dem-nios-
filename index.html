@@ -1,88 +1,94 @@
-<!doctype html>
-<html lang="pt-br"> 
- <head> 
-  <meta charset="UTF-8"> 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> 
-  <title>Father vs Demons - Retro Pixel Art</title> 
-  <link rel="stylesheet" href="style.css"> 
- </head> 
- <body> 
-  <div id="game-container"> 
-   <canvas id="gameCanvas"></canvas> <!-- HUD --> 
-   <div id="hud" class="hidden"> 
-    <div class="hud-item"> 
-     <div id="hearts" class="hearts">
-      ❤️❤️❤️
-     </div> 
-     <div id="score">
-      SCORE: 0
-     </div> 
-    </div> 
-    <div class="hud-item"> 
-     <div id="phase-info">
-      FASE: 1
-     </div> 
-     <div id="cross-type" class="cross-indicator">
-      CRUZ BÁSICA
-     </div> 
-    </div> 
-   </div> <!-- Menu Screen --> 
-   <div id="menu-screen" class="screen"> 
-    <h1>FATHER VS DEMONS</h1> <button class="btn" onclick="game.start()">INICIAR JOGO</button> <button class="btn" onclick="game.showControls()">CONTROLES</button> 
-    <div id="high-score" style="margin-top: 20px; color: var(--gold);">
-     HIGH SCORE: 0
-    </div> 
-   </div> <!-- Controls Screen --> 
-   <div id="controls-screen" class="screen hidden"> 
-    <h1>CONTROLES</h1> 
-    <div class="controls-info"> 
-     <p>← → ou A/D : Movimentar</p> 
-     <p>↑ ou ESPAÇO : Pular</p> 
-     <p>CTRL ou K : Atirar Cruzes</p> 
-     <p>1 a 7 : Trocar Cruzes (se desbloqueadas)</p> 
-     <p>Clique no nome da Cruz no HUD para trocar!</p> 
-     <p>ESC : Pausar | M : Mudo | R : Reiniciar</p> 
-    </div> <button class="btn" onclick="game.showMenu()">VOLTAR</button> 
-   </div> <!-- Pause Screen --> 
-   <div id="pause-screen" class="screen hidden"> 
-    <h1>PAUSADO</h1> <button class="btn" onclick="game.resume()">CONTINUAR</button> <button class="btn" onclick="game.restart()">REINICIAR</button> <button class="btn" onclick="game.showMenu()">MENU PRINCIPAL</button> 
-   </div> <!-- Game Over Screen --> 
-   <div id="game-over-screen" class="screen hidden"> 
-    <h1 style="color: #ff0000;">VOCÊ CAIU...</h1> 
-    <div id="final-score" style="font-size: 24px; margin-bottom: 20px;">
-     SCORE: 0
-    </div> <button class="btn" onclick="game.restart()">TENTAR NOVAMENTE</button> <button class="btn" onclick="game.showMenu()">MENU PRINCIPAL</button> 
-   </div> <!-- Victory Screen --> 
-   <div id="victory-screen" class="screen hidden"> 
-    <h1 style="color: var(--gold);">MAL ERRADICADO!</h1> 
-    <p style="margin-bottom: 20px;">O mundo está a salvo graças à sua fé.</p> 
-    <div id="victory-score" style="font-size: 24px; margin-bottom: 20px;">
-     SCORE FINAL: 0
-    </div> <button class="btn" onclick="game.showMenu()">VOLTAR AO MENU</button> 
-   </div> <!-- Level Transition --> 
-   <div id="transition-screen" class="screen hidden" style="background: rgba(0,0,0,0.95);"> 
-    <h1 id="transition-title">FASE 1</h1> 
-    <p id="transition-desc">Prepare-se...</p> 
-   </div> <!-- Mobile Controls --> 
-   <div id="mobile-controls"> 
-    <div class="d-pad"> 
-     <div class="touch-btn" id="btn-left">
-      ←
-     </div> 
-     <div class="touch-btn" id="btn-right">
-      →
-     </div> 
-    </div> 
-    <div class="action-btns"> 
-     <div class="touch-btn" id="btn-jump">
-      ↑
-     </div> 
-     <div class="touch-btn" id="btn-shoot">
-      †
-     </div> 
-    </div> 
-   </div> 
-  </div> 
-  <script src="game.js" defer></script> 
- </body>
-    </html>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Father vs Demons - Retro Pixel Art</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="game-container">
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- HUD -->
+    <div id="hud" class="hidden">
+        <div class="hud-item">
+            <div id="hearts" class="hearts">❤️❤️❤️</div>
+            <div id="score">SCORE: 0</div>
+        </div>
+        <div class="hud-item">
+            <div id="phase-info">FASE: 1</div>
+            <div id="cross-type" class="cross-indicator">CRUZ BÁSICA</div>
+        </div>
+    </div>
+
+    <!-- Menu Screen -->
+    <div id="menu-screen" class="screen">
+        <h1>FATHER VS DEMONS</h1>
+        <button class="btn" onclick="game.start()">INICIAR JOGO</button>
+        <button class="btn" onclick="game.showControls()">CONTROLES</button>
+        <div id="high-score" style="margin-top: 20px; color: var(--gold);">HIGH SCORE: 0</div>
+    </div>
+
+    <!-- Controls Screen -->
+    <div id="controls-screen" class="screen hidden">
+        <h1>CONTROLES</h1>
+        <div class="controls-info">
+            <p>← → ou A/D : Movimentar</p>
+            <p>↑ ou ESPAÇO : Pular</p>
+            <p>CTRL ou K : Atirar Cruzes</p>
+            <p>1 a 7 : Trocar Cruzes (se desbloqueadas)</p>
+            <p>Clique no nome da Cruz no HUD para trocar!</p>
+            <p>ESC : Pausar | M : Mudo | R : Reiniciar</p>
+        </div>
+        <button class="btn" onclick="game.showMenu()">VOLTAR</button>
+    </div>
+
+    <!-- Pause Screen -->
+    <div id="pause-screen" class="screen hidden">
+        <h1>PAUSADO</h1>
+        <button class="btn" onclick="game.resume()">CONTINUAR</button>
+        <button class="btn" onclick="game.restart()">REINICIAR</button>
+        <button class="btn" onclick="game.showMenu()">MENU PRINCIPAL</button>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="game-over-screen" class="screen hidden">
+        <h1 style="color: #ff0000;">VOCÊ CAIU...</h1>
+        <div id="final-score" style="font-size: 24px; margin-bottom: 20px;">SCORE: 0</div>
+        <button class="btn" onclick="game.restart()">TENTAR NOVAMENTE</button>
+        <button class="btn" onclick="game.showMenu()">MENU PRINCIPAL</button>
+    </div>
+
+    <!-- Victory Screen -->
+    <div id="victory-screen" class="screen hidden">
+        <h1 style="color: var(--gold);">MAL ERRADICADO!</h1>
+        <p style="margin-bottom: 20px;">O mundo está a salvo graças à sua fé.</p>
+        <div id="victory-score" style="font-size: 24px; margin-bottom: 20px;">SCORE FINAL: 0</div>
+        <button class="btn" onclick="game.showMenu()">VOLTAR AO MENU</button>
+    </div>
+
+    <!-- Level Transition -->
+    <div id="transition-screen" class="screen hidden" style="background: rgba(0,0,0,0.95);">
+        <h1 id="transition-title">FASE 1</h1>
+        <p id="transition-desc">Prepare-se...</p>
+    </div>
+
+    <!-- Mobile Controls -->
+    <div id="mobile-controls">
+        <div class="d-pad">
+            <div class="touch-btn" id="btn-left">←</div>
+            <div class="touch-btn" id="btn-right">→</div>
+        </div>
+        <div class="action-btns">
+            <div class="touch-btn" id="btn-jump">↑</div>
+            <div class="touch-btn" id="btn-shoot">†</div>
+        </div>
+    </div>
+</div>
+
+<script src="game.js" defer></script>
+</body>
+     </html>
+         
